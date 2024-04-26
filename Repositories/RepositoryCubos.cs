@@ -1,12 +1,15 @@
 ﻿using ApiCubosJaimeReparaz.Data;
 using ApiCubosJaimeReparaz.Models;
 using Microsoft.EntityFrameworkCore;
+using static System.Net.WebRequestMethods;
 
 namespace ApiCubosJaimeReparaz.Repositories
 {
     public class RepositoryCubos
     {
         private CubosContext context;
+        private string urlusuarios = "https://sacubos.blob.core.windows.net/usuarios/";
+        private string urlcubos = "https://sacubos.blob.core.windows.net/cubos/" ;
 
         public RepositoryCubos(CubosContext context)
         {
@@ -17,7 +20,11 @@ namespace ApiCubosJaimeReparaz.Repositories
 
         public async Task<List<Cubo>> GetCubos()
         {
-            return await this.context.Cubos.ToListAsync();
+            string url = urlcubos;
+            var cubos = await this.context.Cubos.ToListAsync();
+            cubos.ForEach(c => c.Imagen = url + c.Imagen);
+
+            return cubos;
         }
 
         public async Task<List<Cubo>> GetCubosMarca(string marca)
@@ -37,9 +44,13 @@ namespace ApiCubosJaimeReparaz.Repositories
 
         public async Task<Usuario> FindUsuario(string email)
         {
+            string url = urlusuarios;
+
             var usuario = (from u in context.Usuarios
                            where u.Email == email
                            select u).FirstOrDefault();
+
+            usuario.Imagen = url + usuario.Imagen;
 
             return usuario;
         }
